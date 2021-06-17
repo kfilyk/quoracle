@@ -6,9 +6,9 @@ from Scraper import Scraper
 class TwitterScraper(Scraper):
     def __init__(self):
         self.mapper_dict = {
-            "content": lambda payload: payload.get("selftext"),
-            "source": lambda payload: "reddit",
-            "author": lambda payload: payload.get("author")
+            "content": lambda payload: payload.get("content"),
+            "source": lambda payload: "twitter",
+            "author": lambda payload: payload.get("user")
         }
         self.query = "snscrape --jsonl --max-results 100 twitter-search 'from:elonmusk'"
     def _append_token(self, input_str):
@@ -23,4 +23,5 @@ class TwitterScraper(Scraper):
         results_list = list(map(self._append_token, results_list))
         extracted_content = self.extract_data(results_list)
         discarded_data = extracted_content.pop()
+        print(extracted_content[0])
         return extracted_content
