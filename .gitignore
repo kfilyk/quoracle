@@ -1,1 +1,5 @@
 .DS_Store
+scrapers/__pycache__
+scrapers/venv/pyvenv.cfg
+scrapers/scrapers_output.txt
+scrapers/venv
