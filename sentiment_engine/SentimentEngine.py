@@ -41,7 +41,7 @@ class SentimentEngine:
         for term in slang_terms:
             interpretation = self.slang_interpreter[term]
             caseInsensitiveTerm = re.compile(re.escape(term), re.IGNORECASE)
-            result = caseInsensitiveTerm.sub(interpretation, result)
+            result = caseInsensitiveTerm.sub(f"{interpretation} ", result)
         return result
 
     def analyze(self, message):
@@ -70,6 +70,6 @@ class SentimentEngine:
         print([str(score) for score in self.scores])
 
 if __name__ == "__main__":
-    message = "Blacklist"
+    message = 'Discusses the Blacklisting of Chinese Drone Manufacturer'
     sentiment_engine = SentimentEngine()
     sentiment_engine.analyze(message).analyze(message).analyze(message).average_scores().print_scores()
