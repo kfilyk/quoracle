@@ -16,7 +16,8 @@ class TwitterScraper(Scraper):
         # self.query = "snscrape --jsonl --max-results 100 --since 2020-06-01 twitter-search 'from:elonmusk until:2020-06-02'"
         # self.query = "snscrape --jsonl --max-results 100 --since 2020-06-01 twitter-search '#cocacola until:2020-06-02'"
         # --max-results 100
-        self.query = "snscrape --jsonl  --since 2020-06-01 twitter-search '$TSLA until:2020-06-02'"
+        self.query = "snscrape --jsonl --max-results 10 --since 2020-06-01 twitter-search '$TSLA until:2020-06-02'"
+        #self.query = "snscrape --jsonl twitter-search 'from:JCOviedo6'"
 
     def _append_token(self, input_str):
         if (input_str == ""):
@@ -55,8 +56,8 @@ class TwitterScraper(Scraper):
                 for u in t['mentionedUsers']:
                     users_str_list = users_str_list + u['username']+", "
 
-            print("%d. | LIKES: %s | HASHTAGS: %s | MENTIONED: %s | ORIGINAL: %s \n %s\n" %
-                  (i, t['likeCount'], t['hashtags'], users_str_list, t['url'], t['content']))
+            print("%d. %s | LIKES: %s | HASHTAGS: %s | MENTIONED: %s | ORIGINAL: %s \n %s\n" %
+                  (i, t['user']['username'], t['likeCount'], t['hashtags'], users_str_list, t['url'], t['content']))
 
             # print(extracted_json[i]['content'])
             i = i+1
@@ -66,3 +67,5 @@ class TwitterScraper(Scraper):
 ts = TwitterScraper()
 data = ts.scrape()
 # print(data)
+
+# 'followersCount': 5783, 'friendsCount': 993, 'statusesCount': 83163, 'favouritesCount': 200332, 'listedCount': 134, 'mediaCount': 2240,
