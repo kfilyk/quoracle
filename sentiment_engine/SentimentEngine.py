@@ -1,6 +1,7 @@
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import json
 import os
+import re
 
 class Sentiment:
     def __init__(self, neg = 0, neu = 0, pos = 0):
@@ -39,7 +40,8 @@ class SentimentEngine:
         result = original_message
         for term in slang_terms:
             interpretation = self.slang_interpreter[term]
-            result = result.replace(term.upper(), interpretation.upper()).replace(term.lower(), interpretation.lower())
+            caseInsensitiveTerm = re.compile(re.escape(term), re.IGNORECASE)
+            result = caseInsensitiveTerm.sub(interpretation, result)
         return result
 
     def analyze(self, message):
@@ -68,6 +70,6 @@ class SentimentEngine:
         print([str(score) for score in self.scores])
 
 if __name__ == "__main__":
-    message = "$ALPP Alpine 4’s Spencer Gore, Discusses the Blacklisting of Chinese Drone Manufacturer, DJI and its Impact on Impossible Aerospace’s Ability to Capture Market Share"
+    message = "Blacklist"
     sentiment_engine = SentimentEngine()
     sentiment_engine.analyze(message).analyze(message).analyze(message).average_scores().print_scores()
