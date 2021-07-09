@@ -12,6 +12,11 @@ class Sentiment:
         self.neu += other.neu
         self.pos += other.pos
         return self
+    def __truediv__(self, other):
+        self.neg = self.neg / other.neg
+        self.neu = self.neu / other.neu
+        self.pos = self.pos / other.pos
+        return self
     def __str__(self):
         return str({
             "neg": self.neg,
@@ -50,6 +55,12 @@ class SentimentEngine:
         self.scores = [result]
         return self
     
+    def average_scores(self):
+        number_of_scores = len(self.scores)
+        self.accumulate_scores()
+        self.scores = [self.scores[0] / Sentiment(number_of_scores, number_of_scores, number_of_scores)]
+        return self
+
     def get(self):
         return self.scores
 
@@ -57,7 +68,6 @@ class SentimentEngine:
         print([str(score) for score in self.scores])
 
 if __name__ == "__main__":
-    message = "tesla stocks to the moon!!"
-    message2 = "tesla stocks to the moon!!"
+    message = "$ALPP Alpine 4’s Spencer Gore, Discusses the Blacklisting of Chinese Drone Manufacturer, DJI and its Impact on Impossible Aerospace’s Ability to Capture Market Share"
     sentiment_engine = SentimentEngine()
-    sentiment_engine.analyze(message).analyze(message).accumulate_scores().print_scores()
+    sentiment_engine.analyze(message).analyze(message).analyze(message).average_scores().print_scores()
