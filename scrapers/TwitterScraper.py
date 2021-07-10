@@ -69,11 +69,7 @@ class TwitterScraper(Scraper):
             # if('mentionedUsers' in t) and (t['mentionedUsers'] != None):
             # print("%s\n" % t)  # print each tweet
             thread = {}
-            conversation = t['conversationId']
-            if t['conversationId'] is not None:  # store conv
-                thread['conversationId'] = t['conversationId']
-
-            # each thread
+            # each thread has a convo id I assume???
             content = t['content']
             mentioned = []
             links = []
@@ -183,9 +179,19 @@ class TwitterScraper(Scraper):
 
             print("%d. %s | LIKES: %s | FOLLOWERS: %s | CASHTAGS: %s | HASHTAGS: %s | MENTIONED: %s | ORIGINAL: %s | LINKS: %s | \n %s\n" % (
                 i, t['user']['username'], t['likeCount'], t['user']['followersCount'], cashtags, hashtags, mentioned, t['url'], links, content))
-            i = i+1
+
+            thread['number'] = i
+            thread['username'] = t['user']['username']
+            thread['followers'] = t['user']['followersCount']
+            thread['likes'] = t['likeCount']
+            thread['url'] = t['url']
+            thread['links'] = list(links)
+            thread['mentioned'] = list(mentioned)
+            thread['cashtags'] = list(cashtags)
+            thread['hashtags'] = list(hashtags)
             thread['content'] = content
             threads[t['conversationId']] = thread
+            i = i+1
 
         print("(%d TWEETS)" % (i-1))
         file_path = '../scraped_data/%s/twitter.json' % (date_start)
