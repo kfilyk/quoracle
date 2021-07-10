@@ -4,6 +4,7 @@ import subprocess
 from Scraper import Scraper
 from langdetect import detect
 from datetime import datetime, timedelta
+from pathlib import Path
 
 
 class TwitterScraper(Scraper):
@@ -54,20 +55,23 @@ class TwitterScraper(Scraper):
         extracted_json.sort(key=self.get_likes, reverse=True)
         return extracted_json
 
-    def scrape(self):
+    def scrape(self, date, stock):
         threads = {}  # start building a dictionary of concatenated conversation objects, created from amalgamation of tweets
+        date_start = date.strftime('%Y-%m-%d')
+        date_end = (date+timedelta(days=1)).strftime('%Y-%m-%d')
+
         extracted_json = self.call_snscrape(
-            "snscrape --jsonl --max-results 1000 --since 2020-06-01 twitter-search 'TSLA until:2020-06-02'")
+            "snscrape --jsonl --max-results 1000 --since %s twitter-search '%s until:%s'" % (date_start, stock, date_end))
 
         i = 1
         for t in extracted_json:  # for every tweet
 
             # if('mentionedUsers' in t) and (t['mentionedUsers'] != None):
-            print("%s\n" % t)  # print each tweet
-            #thread = {}
-            #conversation = t['conversationId']
-            # if t['conversationId'] is not None:  # store conv
-            #    thread['conversationId'] = t['conversationId']
+            # print("%s\n" % t)  # print each tweet
+            thread = {}
+            conversation = t['conversationId']
+            if t['conversationId'] is not None:  # store conv
+                thread['conversationId'] = t['conversationId']
 
             # each thread
             content = t['content']
@@ -180,14 +184,20 @@ class TwitterScraper(Scraper):
             print("%d. %s | LIKES: %s | FOLLOWERS: %s | CASHTAGS: %s | HASHTAGS: %s | MENTIONED: %s | ORIGINAL: %s | LINKS: %s | \n %s\n" % (
                 i, t['user']['username'], t['likeCount'], t['user']['followersCount'], cashtags, hashtags, mentioned, t['url'], links, content))
             i = i+1
+            thread['content'] = content
+            threads[t['conversationId']] = thread
 
         print("(%d TWEETS)" % (i-1))
-
-        return extracted_json
+        file_path = '../scraped_data/%s/twitter.json' % (date_start)
+        Path("../scraped_data/%s/" % (date_start)
+             ).mkdir(parents=True, exist_ok=True)
+        with open(file_path, 'w+') as f:
+            json.dump(threads, f)
+            #threads = json.dumps(threads)
 
 
 ts = TwitterScraper()
-data = ts.scrape()
+data = ts.scrape(datetime(2020, 6, 1), 'TSLA')
 # print(data)
 
 # 'followersCount': 5783, 'friendsCount': 993, 'statusesCount': 83163, 'favouritesCount': 200332, 'listedCount': 134, 'mediaCount': 2240,
