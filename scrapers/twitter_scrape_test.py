@@ -41,4 +41,4 @@ def call_snscrape(query):
 extracted_json = call_snscrape(
     "snscrape --jsonl twitter-search 'from:alpine4holdings'")
 
-print(extracted_json)
+print([data['content'] for data in extracted_json])
