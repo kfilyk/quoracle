@@ -3,12 +3,14 @@ import json
 import os
 import re
 
+
 class Sentiment:
     def __init__(self, ticker, neg = 0, neu = 0, pos = 0):
         self.ticker = ticker
         self.neg = neg
         self.neu = neu
         self.pos = pos
+
     def __add__(self, other):
         if (self.ticker != other.ticker):
             raise Exception(f"Error: tickers in sentiment object do not match: {self.ticker}, {other.ticker}")
@@ -30,6 +32,7 @@ class Sentiment:
             "neu": self.neu,
             "pos": self.pos
         })
+
 
 class SentimentEngine:
     def __init__(self):
@@ -110,4 +113,5 @@ if __name__ == "__main__":
     processed_message = ProcessedMessage(message)
     sentiment_engine = SentimentEngine()
     sentiment_engine.analyze_processed_message(processed_message)
+    sentiment_engine.print_scores()
     sentiment_engine.print_scores()

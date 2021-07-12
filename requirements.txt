@@ -1,3 +1,4 @@
 vaderSentiment
 snscrape
 langdetect
+langdetect

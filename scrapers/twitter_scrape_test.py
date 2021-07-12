@@ -38,7 +38,36 @@ def call_snscrape(query):
     return extracted_json
 
 
-extracted_json = call_snscrape(
-    "snscrape --jsonl twitter-search 'from:alpine4holdings'")
+"""
+tweet = call_snscrape(
+    "snscrape --jsonl twitter-search 'Tesla Autonomous Driving Regulatory E-Mails'")
+print(tweet)
+"""
 
-print([data['content'] for data in extracted_json])
+"""
+
+tweet = call_snscrape(
+    "snscrape --jsonl twitter-search 'since_id:1267584909289287679 max_id:1267584909289287681 -filter:safe'")
+print(tweet)
+"""
+
+conversation = call_snscrape(
+    "snscrape --jsonl twitter-search 'conversation_id:1267584909289287680 filter:safe'")
+
+for t in conversation:
+    print(t)
+    print('\n')
+
+
+"""
+
+print('\n')
+
+quoted = call_snscrape(
+    "snscrape --jsonl twitter-search 'quoted_tweet_id:1267530078688174080 filter:safe'")
+for t in quoted:
+    print(t)
+    print('\n')
+print(len(quoted))
+
+"""
