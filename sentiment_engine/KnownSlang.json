@@ -6,5 +6,9 @@
     "bear": "negative",
     "bull": "positive",
     "hodl": "positive",
-    "fomo": "negative"
+    "fomo": "negative",
+    "blacklist": "negative",
+    "acquisition": "positive",
+    "up": "positive",
+    "down": "negative"
 }
