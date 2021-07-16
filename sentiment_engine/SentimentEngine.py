@@ -27,8 +27,6 @@ class ProcessedMessage:
             prev_ticker_symbol_length += len(symbol)
             self.tickers.append({"symbol": symbol, "index": ticker_index})
             content = content.replace(symbol, '')
-            print(content)
-            print(ticker_index)
         self.content = content.strip()
         self.num_words_per_particle = num_words_per_particle
         self.particles = []
@@ -100,6 +98,5 @@ if __name__ == "__main__":
     message = 'expecting $TSLA to slide, but coupling to $BTC may change the game. $BTC $GME $AMC'
     processed_message = ProcessedMessage(message)
     processed_message.particlize()
-    print(str(processed_message))
     result = associate_particles_with_tickers(processed_message)
     print(result)
