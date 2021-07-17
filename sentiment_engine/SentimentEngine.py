@@ -22,7 +22,7 @@ class ProcessedMessage:
         content = raw_content
         prev_ticker_symbol_length = 0
         for ticker in ticker_regex.finditer(content):
-            symbol = ticker.group()
+            symbol = ticker.group().strip()
             ticker_index = ticker.start() - prev_ticker_symbol_length
             prev_ticker_symbol_length += len(symbol)
             self.tickers.append({"symbol": symbol, "index": ticker_index})
