@@ -4,50 +4,82 @@ import re
 from abc import ABC
 import nltk
 from nltk.corpus import stopwords
+
+nltk.download("punkt")
 nltk.download('stopwords')
 
 class Particle:
     def __init__(self, message, start_index = 0):
         self.content = message
-        self.center_index = start_index + (len(message) // 2)
+        self.index = start_index
     def __str__(self):
         return str({
             "content": self.content,
-            "center_index": self.center_index
+            "index": self.index
         })
 
 class ProcessedMessage:
     def __init__(self, raw_content, num_words_per_particle = 5):
-        self.stop_words = set(stopwords.words('english'))
+        self.tickers_set = set()
         self.tickers = []
         #ticker_regex = re.compile("(\$|\@)([A-Za-z]*)")
         ticker_regex = re.compile("( ||)(\$)([A-Z]*)( ||)")
-        ticker_index_diffs = []
+        stop_words = set(stopwords.words('english'))
         content = raw_content
-        prev_ticker_symbol_length = 0
-        for ticker in ticker_regex.finditer(content):
-            symbol = ticker.group().strip()
-            ticker_index = ticker.start() - prev_ticker_symbol_length
-            prev_ticker_symbol_length += len(symbol)
-            self.tickers.append({"symbol": symbol, "index": ticker_index})
-            content = content.replace(symbol, '')
+        words = [word for word in nltk.word_tokenize(content) if word.isalnum() or word == "$"]
+        particles = []
+        # header tickers should be assigned index of -1 to have 0 squared distance assigned for all particles
+        index = 0
+        while (index < len(words)):
+            word = words[index]
+            if (word == "$"):
+                symbol = words[index + 1]
+                self.tickers.append({"symbol": symbol, "index": -1})
+                self.tickers_set.add(symbol)
+                # delete cash tag
+                del words[index]
+                # delete ticker symbol associated with cash tag
+                del words[index]
+                index -= 1
+            else:
+                break
+            index += 1
+        # footer tickers should be assigned index of -1 to have 0 squared distance assigned for all particles
+        index = len(words) - 2
+        while (index >= 0):
+            word = words[index]
+            if (word == "$"):
+                symbol = words[index + 1]
+                self.tickers.append({"symbol": symbol, "index": -1})
+                self.tickers_set.add(symbol)
+                # delete cash tag
+                del words[index]
+                # delete ticker symbol associated with cash tag
+                del words[index]
+            else:
+                break
+            index -= 2
+        # process tickers in content body
+        index = 0
+        while (index < len(words)):
+            word = words[index]
+            if (len(word) > 0 and (not word.lower() in stop_words) and not ticker_regex.match(word)):
+                particle = Particle(word, index)
+                particles.append(particle)
+                index += 1
+                continue
+            elif (word == "$"):
+                symbol = words[index + 1]
+                self.tickers.append({"symbol": symbol, "index": index})
+                self.tickers_set.add(symbol)
+            index += 1
+
+        self.particles = particles
         self.content = content.strip()
         self.num_words_per_particle = num_words_per_particle
-        self.particles = []
-    def particlize(self):
-        n = self.num_words_per_particle
-        words = self.content.split(" ")
-        particles = []
-        particle_i = 0
-        char_index = 0
-        particle_start_index = 0
-        for word in words:
-            if (len(word) > 0 and not word.lower() in self.stop_words):
-                particles.append(Particle(word, particle_start_index))
-            particle_i += 1
-            particle_start_index = char_index
-            char_index += len(word) + 1 # extra 1 for the appended space after each word
         self.particles = particles
+        self.stop_words = stop_words
+
     def __str__(self):
         return str({
             "tickers": self.tickers,
@@ -58,20 +90,25 @@ class ProcessedMessage:
         print([str(particle) for particle in self.particles])
 
 def squared_distance(point_1, point_2):
+    if (point_1 < 0 or point_2 < 0):
+        return 0
     return ((point_1) - (point_2))**2
 
 def associate_particles_with_tickers(processed_message):
     result = {}
     for ticker in processed_message.tickers:
-        if (result.get(ticker['symbol']) == None):
-            result[ticker['symbol']] = []
+        symbol = ticker['symbol']
+        if (result.get(symbol) == None):
+            result[symbol] = {}
         for particle in processed_message.particles:
-            result[ticker['symbol']].append({'particle': particle.content, 'distance': squared_distance(ticker['index'], particle.center_index)})
+            if (not particle.content in processed_message.tickers_set):
+                result[symbol][particle.content] = {
+                    'squared_distance': squared_distance(ticker['index'], particle.index)
+                }
     return result
 
 if __name__ == "__main__":
-    message = 'expecting $TSLA to slide, but coupling to $BTC may change the game. $BTC $GME $AMC'
+    message = '$AMZN $AAPL expecting $TSLA to slide, but coupling to $BTC may change the game.  $GME $AMC $BTC '
     processed_message = ProcessedMessage(message)
-    processed_message.particlize()
     result = associate_particles_with_tickers(processed_message)
     print(result)
