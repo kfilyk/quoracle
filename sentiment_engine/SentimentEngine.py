@@ -19,12 +19,15 @@ class Particle:
         })
 
 class ProcessedMessage:
-    def __init__(self, raw_content, num_words_per_particle = 5):
+    def __init__(self, raw_content, exclude_stop_words=True):
         self.tickers_set = set()
         self.tickers = []
         #ticker_regex = re.compile("(\$|\@)([A-Za-z]*)")
         ticker_regex = re.compile("( ||)(\$)([A-Z]*)( ||)")
-        stop_words = set(stopwords.words('english'))
+        if (exclude_stop_words):
+            stop_words = set(stopwords.words('english'))
+        else:
+            stop_words = set()
         content = raw_content
         words = [word for word in nltk.word_tokenize(content) if word.isalnum() or word == "$"]
         particles = []
@@ -76,7 +79,6 @@ class ProcessedMessage:
 
         self.particles = particles
         self.content = content.strip()
-        self.num_words_per_particle = num_words_per_particle
         self.particles = particles
         self.stop_words = stop_words
 
@@ -109,6 +111,6 @@ def associate_particles_with_tickers(processed_message):
 
 if __name__ == "__main__":
     message = '$AMZN $AAPL expecting $TSLA to slide, but coupling to $BTC may change the game.  $GME $AMC $BTC '
-    processed_message = ProcessedMessage(message)
+    processed_message = ProcessedMessage(message, False)
     result = associate_particles_with_tickers(processed_message)
     print(result)
