@@ -1,19 +1,29 @@
-import os
-import json
-import subprocess
-from Scraper import Scraper
-from langdetect import detect
-from datetime import datetime, timedelta
+
+import nltk
+import emoji
 from pathlib import Path
-from emoji import UNICODE_EMOJI
+from datetime import datetime, timedelta
+from Scraper import Scraper
+import string
+import re
+import subprocess
+import json
+import os
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+nltk.download("stopwords")
+nltk.download("punkt")
 
 
-def is_emoji(s):
-    return s in UNICODE_EMOJI
+def extract_emojis(s):
+    return ''.join(c for c in s if c in emoji.UNICODE_EMOJI['en'])
 
 
-def add_space(text):
-    return ''.join(' ' + char if is_emoji(char) else char for char in text).strip()
+def space_emojis(text):
+    emojis = extract_emojis(text)
+    for e in emojis:  # go through every emoji
+        text = text.replace(e, ' '+e)
+    return text
 
 
 class TwitterScraper(Scraper):
@@ -69,11 +79,15 @@ class TwitterScraper(Scraper):
         conversations = {}  # start building a dictionary of concatenated conversation objects, created from amalgamation of tweets
         date_start = date.strftime('%Y-%m-%d')
         date_end = (date+timedelta(days=1)).strftime('%Y-%m-%d')
+        stop_words = set(stopwords.words('english'))
 
         extracted_json = self.call_snscrape(
-            "snscrape --jsonl --max-results 20 --since %s twitter-search '%s until:%s'" % (date_start, stock, date_end))
+            # "snscrape --jsonl --max-results 20 --since %s twitter-search '%s until:%s'" % (date_start, stock, date_end))
 
-        for e in extracted_json:  # for every tweet
+            "snscrape --jsonl --since %s twitter-search '%s until:%s'" % (date_start, stock, date_end))
+
+        # finds every conversation thread from results of snscrape
+        for e in extracted_json:
             if e['lang'] != 'en':  # if the main language isn't english, ignore this conversation. Not worth it to parse in vader
                 extracted_json.remove(e)
                 continue
@@ -112,11 +126,13 @@ class TwitterScraper(Scraper):
                 conversation_json.append(
                     conversation_json[len(conversation_json)-1]['quotedTweet'])
 
-            for tweet in conversation_json:  # for each tweet in conversation
+            # for each tweet in conversation
+            for tweet in conversation_json:
                 # space out emojis, remove new lines
                 reply = {}
-                content = add_space(tweet['content'])
-                content = content.replace('\n', ' ')
+                content = space_emojis(
+                    tweet['content'])  # space out emojis
+                # print(content)
                 mentioned = []
                 links = []
                 cashtags = []
@@ -142,8 +158,52 @@ class TwitterScraper(Scraper):
                     for l in redundant_links:
                         content = content.replace(l, '')
 
+                if mentioned is not None:
+                    for m in mentioned:
+                        content = content.replace('@'+m, '')
+
+                content = content.replace('\n', ' ')
+                content = content.replace('&amp;', '&')
+                content = content.replace('\'s', '')
+                content = content.replace('‘s', '')
+                content = content.replace('\'', '')
+                content = content.replace('‘', '')
+                content = content.replace('’', '')
+                content = content.replace('`', '')
+                content = re.sub('([.,!?()"-])', r' \1 ', content)
+                content = content.replace('/', ' ')
+                content = content.replace('/', ' ')
+                content = content.replace('@', '')
+                content = content.lower()  # convert to lower case
+
+                if cashtags is not None:
+                    for c in cashtags:
+                        cashtags.remove(c)
+                        c = c.lower()
+                        content = content.replace('$'+c+' ', c.upper()+' ')
+                        cashtags.add(c.upper())
+
+                if hashtags is not None:
+                    for h in hashtags:
+                        hashtags.remove(h)
+                        h = h.lower()
+                        content = content.replace('#'+h+' ', h.upper()+' ')
+                        hashtags.add(h.upper())
+
+                # remove stop words
+                """
+                word_tokens = word_tokenize(content)
+                filtered_content = [
+                    w for w in word_tokens if not w.lower() in stop_words]  # get rid of stop words
+                """
+                """
+                for w in word_tokens:
+                    if w not in stop_words:
+                        filtered_sentence.append(w)
+                        """
+
                 # print("%s: @%s | LIKES: %s | FOLLOWERS: %s | CASHTAGS: %s | HASHTAGS: %s | MENTIONED: %s | ORIGINAL: %s | LINKS: %s | \n %s\n" % (
-                    # tweet['date'], tweet['user']['username'], tweet['likeCount'], tweet['user']['followersCount'], cashtags, hashtags, mentioned, tweet['url'], links, content))
+                #    tweet['date'], tweet['user']['username'], tweet['likeCount'], tweet['user']['followersCount'], cashtags, hashtags, mentioned, tweet['url'], links, content))
 
                 reply['username'] = tweet['user']['username']
                 reply['followers'] = tweet['user']['followersCount']
