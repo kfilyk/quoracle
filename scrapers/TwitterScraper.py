@@ -95,8 +95,8 @@ class TwitterScraper(Scraper):
         date_start = date.strftime('%Y-%m-%d')
         date_end = (date+timedelta(days=1)).strftime('%Y-%m-%d')
 
-        file_path = '../scraped_data/%s/%s/twitter.json' % (date_start, stock)
-        Path("../scraped_data/%s/%s" % (date_start, stock)
+        file_path = '../data/raw/%s/%s/twitter.json' % (date_start, stock)
+        Path("../data/raw/%s/%s" % (date_start, stock)
              ).mkdir(parents=True, exist_ok=True)
         if os.path.isfile(file_path):
             with open(file_path) as f:
