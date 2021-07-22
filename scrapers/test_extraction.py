@@ -38,33 +38,42 @@ def call_snscrape(query):
     return extracted_json
 
 
+id = 1267437132240441344
 """
 tweet = call_snscrape(
     "snscrape --jsonl twitter-search 'Tesla Autonomous Driving Regulatory E-Mails'")
 print(tweet)
 """
-
-"""
-
 tweet = call_snscrape(
-    "snscrape --jsonl twitter-search 'since_id:1267584909289287679 max_id:1267584909289287681 -filter:safe'")
-print(tweet)
-"""
+    "snscrape --jsonl twitter-search 'since_id:%d max_id:%d -filter:safe'" % (id-1, id))
+
+print("PARENT TWEET: \n", tweet)
 
 conversation = call_snscrape(
-    "snscrape --jsonl twitter-search 'conversation_id:1267584909289287680 filter:safe'")
+    "snscrape --jsonl twitter-search 'conversation_id:%d -filter:safe'" % (id))
 
 for t in conversation:
     print(t)
     print('\n')
+print('\nEND OF CONVERSATION (%d TWEETS)\n\n' % (len(conversation)))
+
+
+print("PARENT TWEET: \n", tweet)
 
 
 """
 
 print('\n')
-
+"""
+"""
 quoted = call_snscrape(
-    "snscrape --jsonl twitter-search 'quoted_tweet_id:1267530078688174080 filter:safe'")
+    "snscrape --jsonl twitter-search 'quoted_tweet_id:%d filter:safe'" %(id))
+"""
+"""
+quoted = call_snscrape(
+    "snscrape --jsonl twitter-search 'quoted_tweet_id:%d filter:safe'"%(id))
+"""
+"""
 for t in quoted:
     print(t)
     print('\n')
