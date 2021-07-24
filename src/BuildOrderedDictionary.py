@@ -13,7 +13,6 @@ for (dirpath, dirnames, filenames) in walk(scraped_data_file_path):
         if '.json' in fi:
             # print(dirpath)
             scraped_data_files.append(dirpath + '/'+fi)
-print(scraped_data_files)
 
 all_words = []
 convos = []
@@ -22,7 +21,6 @@ for fi in scraped_data_files:
         with open(fi) as f:
             for jsonObj in f:  # for every conversation
                 j = json.loads(jsonObj)
-                print(j)
                 words = j['content'].split()
                 for w in words:
                     all_words.append(w)

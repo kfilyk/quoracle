@@ -4,6 +4,7 @@ import re
 from abc import ABC
 import nltk
 from nltk.corpus import stopwords
+import flair
 
 nltk.download("punkt")
 nltk.download('stopwords')
@@ -109,8 +110,28 @@ def associate_particles_with_tickers(processed_message):
                 }
     return result
 
+class SentimentAnalyzer:
+    def __init__(self):
+        self.model = flair.models.TextClassifier.load('en-sentiment')
+    def analyze(self, content):
+        sample = flair.data.Sentence(content)
+        self.model.predict(sample)
+        label = sample.labels[0]
+        positive_score = 0
+        negative_score = 0
+        if (label.value == 'POSITIVE'):
+          positive_score = label.score
+        elif (label.value == 'NEGATIVE'):
+          negative_score = label.score
+        result = {
+            'pos': positive_score,
+            'neg': negative_score
+        }
+        return result
+
 if __name__ == "__main__":
     message = '$AMZN $AAPL expecting $TSLA to slide, but coupling to $BTC may change the game.  $GME $AMC $BTC '
     processed_message = ProcessedMessage(message, False)
     result = associate_particles_with_tickers(processed_message)
     print(result)
+    sentiment = SentimentAnalyzer().analyze(message)
