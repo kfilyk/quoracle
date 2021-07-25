@@ -5,3 +5,4 @@ scrapers/scrapers_output.txt
 scrapers/venv
 venv
 scraped_data
+src/__pycache__
