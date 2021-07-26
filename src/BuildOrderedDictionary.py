@@ -31,9 +31,23 @@ count_words = Counter(all_words)
 total_words = len(all_words)
 sorted_words = count_words.most_common(total_words)
 
-vocab_to_int = {w: [i, c] for i, (w, c) in enumerate(sorted_words)}
+
+vocab_to_int = {w: (i, c) for i, (w, c) in enumerate(sorted_words)}
 # prints out a dictionary containing words and word frequencies, in order of word frequency
-print(vocab_to_int)
+# print(vocab_to_int)
+
+ord_dict = {}
+for w in vocab_to_int:
+    word = {}
+    word['count'] = vocab_to_int[w][0]
+    word['freq'] = vocab_to_int[w][1]
+    ord_dict[w] = word
+
+file_path = '../data/ord_dict.json'
+
+with open(file_path, 'w+') as f:
+    json.dump(ord_dict, f)
+
 '''
 scraped_data_files = [f for f in listdir(scraped_data_file_path) if isfile(
     join(scraped_data_file_path, f))]  # file path of count ordered dict
