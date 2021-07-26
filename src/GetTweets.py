@@ -72,6 +72,7 @@ class TwitterScraper(Scraper):
 
     def scrape(self, date, stock):
         # Note: tweet_urls is useful for restarting TweetExtraction after an error has occured. will not overwrite previously written json- simply adds to it.
+        convos = {}
         tweet_urls = []
         date_start = date.strftime('%Y-%m-%d')
         date_end = (date+timedelta(days=1)).strftime('%Y-%m-%d')
@@ -79,14 +80,6 @@ class TwitterScraper(Scraper):
         file_path = '../data/raw/%s/%s/twitter.json' % (date_start, stock)
         Path("../data/raw/%s/%s" % (date_start, stock)
              ).mkdir(parents=True, exist_ok=True)
-        if os.path.isfile(file_path):
-            with open(file_path) as f:
-                for jsonObj in f:
-                    j = json.loads(jsonObj)
-                    # append every conversation id that already exists
-                    tweet_urls.append(j['url'])
-        else:
-            open(file_path, 'w+')
 
         # "snscrape --jsonl --max-results 20 --since %s twitter-search '%s until:%s'" % (date_start, stock, date_end))
         extracted_json = self.call_snscrape(
@@ -232,13 +225,11 @@ class TwitterScraper(Scraper):
 
             # print("%s: @%s | LIKES: %s | FOLLOWERS: %s | CASHTAGS: %s | HASHTAGS: %s | MENTIONED: %s | ORIGINAL: %s | LINKS: %s | \n %s\n" % (
             #    tweet['date'], tweet['user']['username'], tweet['likeCount'], tweet['user']['followersCount'], cashtags, hashtags, mentioned, tweet['url'], links, content))
-            tweet_json['url'] = tweet['url']
-            tweet_json['content'] = content
-            #tweet_json['oc'] = tweet['content']
 
-            with open(file_path, 'a') as f:
-                json.dump(tweet_json, f)
-                f.write('\n')
+            #tweet_json['oc'] = tweet['content']
+            convos[tweet['url']] = content
+        with open(file_path, 'w+') as f:
+            json.dump(convos, f)
 
         print("%d tweets analyzed, %d recorded" %
               (num_extracted, len(tweet_urls)))
