@@ -18,13 +18,14 @@ all_words = []
 convos = []
 for fi in scraped_data_files:
     if os.path.isfile(fi):
-        with open(fi) as f:
-            for jsonObj in f:  # for every conversation
-                j = json.loads(jsonObj)
-                words = j['content'].split()
+        with open(fi, 'r') as f:
+            data = json.loads(f.read())  # json list
+            for t in data:
+                # print(t)
+                words = data[t].split()
                 for w in words:
                     all_words.append(w)
-                    # print("%s: %s" % (d, j[d]['content'])) # print content
+                # print("%s: %s" % (d, j[d]['content'])) # print content
                 # print('\n')
 
 count_words = Counter(all_words)

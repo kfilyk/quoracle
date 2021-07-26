@@ -169,6 +169,8 @@ class TwitterScraper(Scraper):
             content = content.replace('&lt;', ' <')
             content = content.replace('\"', ' \' ')
             content = content.replace('‘', '\'')
+            content = content.replace('{', '')
+            content = content.replace('}', '')
             content = content.replace('’', '\'')
             content = content.replace('`', '\'')
             content = content.replace('/', ' ')
@@ -228,9 +230,8 @@ class TwitterScraper(Scraper):
 
             #tweet_json['oc'] = tweet['content']
             convos[tweet['url']] = content
-        with open(file_path, 'w+') as f:
-            json.dump(convos, f)
-
+        with open(file_path, 'w') as f:
+            f.write(json.dumps(convos))
         print("%d tweets analyzed, %d recorded" %
               (num_extracted, len(tweet_urls)))
 
