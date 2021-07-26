@@ -15,14 +15,12 @@ from sklearn.metrics import mean_squared_error, r2_score
 import csv
 import math
 from matplotlib import pyplot as plt
-import altair as alt
 import numpy as np
 import pandas as pd
 import yfinance as yf
 #!pip install yfinance
 #!pip install - q pyyaml h5py  # Required to save models in HDF5 format
 #!pip install cpi
-
 
 cpi.update()
 
@@ -33,8 +31,6 @@ cpi.update()
 pd.set_option('display.max_columns', None)
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('max_colwidth', None)
-
-# modified combiner function
 
 
 def combine_histories(stock_dfs):
@@ -51,7 +47,7 @@ def combine_histories(stock_dfs):
     combine_df.sort_values(by=['Date'], inplace=True)
     return combine_df
 
-# append all preprocessed data that could possibly be of use
+# extract all data from yf. stock that can be appended to full array
 
 
 def prep_lstm_stock(stock_df, name):
@@ -73,6 +69,7 @@ def prep_lstm_stock(stock_df, name):
         stock_df['Return'].std()  # using standardization
     stock_df = stock_df.drop(['High', 'Low', 'Open', 'Stock Splits', 'Dividends',
                              'Return', 'Volume'], axis=1, errors='ignore')  # drop these for now
+
     # LEAVE THIS: deletes september 11th 2001 from data
     stock_df = stock_df[stock_df.index != '2001-09-12']
 
@@ -104,7 +101,7 @@ print(test_stock.loc['2001-08-28':'2001-09-30'])
 stock_list = []
 #stock_list = ['AMZN','AAPL', 'FB', 'MSFT','TSLA', 'GOOG']
 # stock_list = ['KO','AMZN', 'AAPL', 'FB','GOOGL', 'MSFT', 'TSLA', 'XOM', 'GE', 'IBM', 'MO', 'JNJ','GM', 'CVX','WMT', 'PG', 'BRK-A', 'BRK-B', '^VIX', 'WFC'] #'DWDP' delisted?
-with open('/content/drive/MyDrive/Quoracle/stock_list.csv', 'r') as f:
+with open('../data/stock_list.csv', 'r') as f:
     for r in f:
         stock_list.append(r.rstrip())
 

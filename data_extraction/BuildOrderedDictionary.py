@@ -19,7 +19,7 @@ convos = []
 for fi in scraped_data_files:
     if os.path.isfile(fi):
         with open(fi, 'r') as f:
-            data = json.loads(f.read())  # json list
+            data = json.load(f)  # json list
             for t in data:
                 # print(t)
                 words = data[t].split()
@@ -33,21 +33,21 @@ total_words = len(all_words)
 sorted_words = count_words.most_common(total_words)
 
 
-vocab_to_int = {w: (i, c) for i, (w, c) in enumerate(sorted_words)}
+vocab_to_int = {w: (i+1, c) for i, (w, c) in enumerate(sorted_words)}
 # prints out a dictionary containing words and word frequencies, in order of word frequency
 # print(vocab_to_int)
 
-ord_dict = {}
+encoding_dict = {}
 for w in vocab_to_int:
     word = {}
     word['count'] = vocab_to_int[w][0]
     word['freq'] = vocab_to_int[w][1]
-    ord_dict[w] = word
+    encoding_dict[w] = word
 
-file_path = '../data/ord_dict.json'
+file_path = '../data/encoding_dict.json'
 
 with open(file_path, 'w+') as f:
-    json.dump(ord_dict, f)
+    json.dump(encoding_dict, f)
 
 '''
 scraped_data_files = [f for f in listdir(scraped_data_file_path) if isfile(
